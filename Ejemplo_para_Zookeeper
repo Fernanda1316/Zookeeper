@@ -1,0 +1,42 @@
+import unittest
+from zookeeper import Ztree
+
+class TestZookeeper(unittest.TestCase):
+
+    
+
+    def test_comprobacion_hijos(self):
+        tree = Ztree()
+        tree.create('/nodo1', 'Prueba', False, True, 0, '/')
+        tree.create('/nodo2', 'Prueba2', True, True, 15, '/nodo1')
+        self.assertIn(tree.tree.get_node('/nodo1'), tree.tree.children('/'))
+        self.assertIn(tree.tree.get_node('/nodo2'), tree.tree.children('/nodo1'))
+
+    def test_prueba_borrar_nodo_inexistente(self):
+        tree = Ztree()
+        tree.create('/nodo1', 'Prueba', False, True, 0, '/')
+        self.assertIsNone(tree.delete('nodo2', 0)) #Print regresan None
+
+    def test_efimero_con_deadtime(self):
+        tree = Ztree()
+        tree.create('/nodo2', 'Prueba', True, True, 15, '/')
+        tree.delete('/nodo2', 0)
+        self.assertFalse(tree.exist('/nodo2'))
+        
+
+    def test_buscar_nodo(self):
+        tree = Ztree()
+        tree.create('/nodo3', 'Prueba', False, True, 0, '/')
+        self.assertTrue(tree.exist('/nodo3'))
+
+    def test_intento_eliminar_version_antigua(self):
+        tree = Ztree()
+        tree.create('/nodo4', 'Prueba', False, True, 0, '/')
+        tree.setData('/nodo4', 'Modificacion')
+        tree.setData('/nodo4', 'Segunda Modificación')
+        tree.delete('/nodo4', 1)
+        self.assertTrue(tree.exist('/nodo4'))
+
+
+if __name__ == '__main__':
+    unittest.main()
